@@ -153,4 +153,13 @@ pub fn removeValAll(self: *Self, val: i32) void {
 pub fn reverse(self: *Self) void {
     var curr = self.head;
     var prev: ?*Node = null;
+
+    while (curr) |node| {
+        const next = node.next;
+        node.next = prev;
+        prev = node;
+        curr = next;
+    }
+
+    self.head = prev;
 }

@@ -121,3 +121,19 @@ pub fn removeAll(self: *Self, val: i32) void {
         }
     }
 }
+
+// reverse the linked list
+pub fn reverse(self: *Self) void {
+    self.tail = self.head;
+    var curr = self.head;
+    var prev: ?*Node = null;
+
+    while (curr) |node| {
+        const next = node.next;
+        node.next = prev;
+        prev = node;
+        curr = next;
+    }
+
+    self.head = prev;
+}
