@@ -9,6 +9,7 @@ pub const Node = struct {
 
 alloc: std.mem.Allocator,
 head: ?*Node = null,
+len: usize = 0,
 
 pub fn init(alloc: std.mem.Allocator) Self {
     return .{ .alloc = alloc };
@@ -24,25 +25,20 @@ pub fn deinit(self: *Self) void {
     }
 
     self.head = null;
+    self.len = 0;
 }
 
 // get length of list.
 pub fn size(self: *Self) usize {
-    var curr = self.head;
-    var count: usize = 0;
-
-    while (curr) |n| : ({
-        curr = n.next;
-        count += 1;
-    }) {}
-
-    return count;
+    return self.len;
 }
 
 // at end of list.
 pub fn append(self: *Self, val: i32) !void {
     const node = try self.alloc.create(Node);
     node.* = .{ .data = val, .next = null };
+
+    self.len += 1;
 
     if (self.head == null) {
         self.head = node;
@@ -65,13 +61,13 @@ pub fn prepend(self: *Self, val: i32) !void {
     node.* = .{ .data = val, .next = self.head };
 
     self.head = node;
+    self.len += 1;
 }
 
 // at any pos in the list but not at the begining and end of list.
 pub fn insertAtPos(self: *Self, pos: usize, val: i32) !void {
-    const len = self.size();
     if (pos == 0) return self.prepend(val);
-    if (pos >= len) return self.append(val);
+    if (pos >= self.len) return self.append(val);
 
     const node = try self.alloc.create(Node);
     node.* = .{ .data = val };
@@ -89,6 +85,8 @@ pub fn insertAtPos(self: *Self, pos: usize, val: i32) !void {
             break;
         }
     }
+
+    self.len += 1;
 }
 
 // find pos of a given value.
@@ -122,6 +120,7 @@ pub fn removeVal(self: *Self, val: i32) void {
                 self.head = node.next;
             }
             self.alloc.destroy(node);
+            self.len -= 1;
             return;
         }
     }
@@ -141,10 +140,17 @@ pub fn removeValAll(self: *Self, val: i32) void {
                 self.head = next;
             }
             self.alloc.destroy(node);
+            self.len -= 1;
             curr = next;
         } else {
             prev = node;
             curr = node.next;
         }
     }
+}
+
+// reverse the linked list
+pub fn reverse(self: *Self) void {
+    var curr = self.head;
+    var prev: ?*Node = null;
 }

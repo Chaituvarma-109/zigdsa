@@ -34,7 +34,7 @@ pub fn size(self: *Self) usize {
     return self.len;
 }
 
-pub fn append(self: *Self, val: i32) void {
+pub fn append(self: *Self, val: i32) !void {
     const node = try self.alloc.create(Node);
     node.* = .{ .data = val };
 
@@ -48,7 +48,7 @@ pub fn append(self: *Self, val: i32) void {
     self.len += 1;
 }
 
-pub fn prepend(self: *Self, val: i32) void {
+pub fn prepend(self: *Self, val: i32) !void {
     const node = try self.alloc.create(Node);
     node.* = .{ .data = val, .next = self.head };
 
@@ -68,8 +68,8 @@ pub fn search(self: *Self, val: i32) ?*Node {
     return null;
 }
 
-pub fn remove(self: *Self, val: i32) bool {
-    if (self.head == null) return false;
+pub fn remove(self: *Self, val: i32) void {
+    if (self.head == null) return;
 
     var curr = self.head;
     var previous: ?*Node = null;
@@ -86,11 +86,38 @@ pub fn remove(self: *Self, val: i32) bool {
             self.alloc.destroy(n);
             self.len -= 1;
 
-            return true;
+            return;
         }
 
         previous = n;
     }
 
-    return false;
+    return;
+}
+
+pub fn removeAll(self: *Self, val: i32) void {
+    if (self.head == null) return;
+
+    var curr = self.head;
+    var previous: ?*Node = null;
+
+    while (curr) |n| {
+        if (n.data == val) {
+            const next = n.next;
+            if (previous) |pn| {
+                pn.next = next;
+            } else {
+                self.head = next;
+            }
+
+            if (self.tail == n) self.tail = previous;
+            self.alloc.destroy(n);
+            self.len -= 1;
+
+            curr = next;
+        } else {
+            previous = n;
+            curr = n.next;
+        }
+    }
 }
